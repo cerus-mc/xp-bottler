@@ -25,6 +25,7 @@ public class XpBottler extends CerusPlugin {
         int cost = config.getInt("cost", 3);
         String permission = config.getString("permission", "xpbottler.use");
         Material blockType = Material.getMaterial(config.getString("block-type", Material.EMERALD_BLOCK.name()));
+        Sound sound = Sound.valueOf(config.getString("sound", Sound.ITEM_BOTTLE_FILL.name()));
 
         // Exit if block type is unknown / invalid
         if(blockType == null) {
@@ -72,7 +73,7 @@ public class XpBottler extends CerusPlugin {
                     player.getInventory().clear(player.getInventory().getHeldItemSlot());
                 }
 
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 1);
+                player.playSound(player.getLocation(), sound, 1, 1);
 
                 event.setCancelled(true);
             }
