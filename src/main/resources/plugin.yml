@@ -2,3 +2,4 @@ name: XpBottler
 author: Cerus
 version: ${project.version}
 main: de.cerus.xpbottler.XpBottler
+api-version: 1.15

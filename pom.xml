@@ -6,8 +6,9 @@
 
     <groupId>de.cerus.xpbottler</groupId>
     <artifactId>xp-bottler</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <version>1.0.0</version>
+
 
     <build>
         <defaultGoal>clean package</defaultGoal>
@@ -49,9 +50,6 @@
             </resource>
         </resources>
     </build>
-    <modules>
-        <module>Bungee</module>
-    </modules>
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -78,7 +76,7 @@
             <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>de.cerus</groupId>
             <artifactId>CerusLib</artifactId>
