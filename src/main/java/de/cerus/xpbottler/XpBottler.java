@@ -19,9 +19,6 @@ public class XpBottler extends CerusPlugin {
     public void onPluginEnable() {
         // Save default config
         FileConfiguration config = getConfig();
-        config.addDefault("cost", 3);
-        config.addDefault("permission", "xpbottler.use");
-        config.addDefault("block-type", Material.EMERALD_BLOCK.name());
         saveDefaultConfig();
 
         // Get variables from config
