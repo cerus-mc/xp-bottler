@@ -1,5 +1,5 @@
 # xp-bottler
-Spigot plugin to convert xp points into xp bottles
+Spigot plugin to convert xp points into xp bottles\
 Requested by StarRift @ Orbonix.net
 
 # Usage
