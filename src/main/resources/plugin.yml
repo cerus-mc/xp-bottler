@@ -3,3 +3,6 @@ author: Cerus
 version: ${project.version}
 main: dev.cerus.xpbottler.XpBottlerPlugin
 api-version: 1.15
+
+softdepend:
+  - Vault

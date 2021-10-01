@@ -2,3 +2,7 @@ cost: 9
 permission: "xpbottler.use"
 block-type: "EMERALD_BLOCK"
 sound: "ITEM_BOTTLE_FILL"
+
+vault:
+  enable: false
+  cost-per-bottle: 10.0

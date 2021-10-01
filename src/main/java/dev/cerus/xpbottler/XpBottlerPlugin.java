@@ -22,9 +22,11 @@ public class XpBottlerPlugin extends JavaPlugin {
 
         // Get variables from config
         final int cost = config.getInt("cost", 9);
-        final String permission = config.getString("permission", "xpbottler.use");
+        final String permission = config.getString("permission", null);
         final Material blockType = Material.getMaterial(config.getString("block-type", Material.EMERALD_BLOCK.name()));
         final Sound sound = Sound.valueOf(config.getString("sound", Sound.ITEM_BOTTLE_FILL.name()));
+        final boolean enableVault = config.getBoolean("vault.enable", false);
+        final double vaultPrice = config.getDouble("vault.cost-per-bottle");
 
         // Exit if block type is unknown / invalid
         if (blockType == null) {
@@ -32,6 +34,18 @@ public class XpBottlerPlugin extends JavaPlugin {
             this.getPluginLoader().disablePlugin(this);
             return;
         }
+
+        final EconomyHook economyHook;
+        if (enableVault && !this.getServer().getPluginManager().isPluginEnabled("Vault")) {
+            this.getLogger().severe("Error: You have enabled the Vault integration but Vault is not installed!");
+            this.getPluginLoader().disablePlugin(this);
+            return;
+        } else if (enableVault) {
+            economyHook = new EconomyHook();
+        } else {
+            economyHook = null;
+        }
+
 
         // Register interact listener
         this.getServer().getPluginManager().registerEvents(new Listener() {
@@ -66,13 +80,21 @@ public class XpBottlerPlugin extends JavaPlugin {
                     return;
                 }
 
-                // Return if players inventory is full
+                // Handle eco
+                if (economyHook != null && economyHook.ready()) {
+                    final double price = vaultPrice * (player.isSneaking() ? item.getAmount() : 1);
+                    if (!economyHook.has(player, price)) {
+                        player.sendMessage("§cYou need $" + price + " to do this.");
+                        return;
+                    }
+
+                    economyHook.withdraw(player, price);
+                }
+
                 final ItemStack bottle = new ItemStack(Material.EXPERIENCE_BOTTLE);
                 bottle.setAmount(player.isSneaking() ? item.getAmount() : 1);
-                if (!player.getInventory().addItem(bottle).isEmpty()) {
-                    player.sendMessage("§cYour inventory is full!");
-                    return;
-                }
+                player.getInventory().addItem(bottle).forEach((integer, itemStack) ->
+                        player.getWorld().dropItem(player.getLocation(), itemStack));
 
                 // Update players xp
                 XpBottlerPlugin.this.changePlayerExp(player, -(player.isSneaking() ? cost * item.getAmount() : cost));
