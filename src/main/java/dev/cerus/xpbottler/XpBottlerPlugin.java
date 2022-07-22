@@ -21,7 +21,7 @@ public class XpBottlerPlugin extends JavaPlugin {
         final FileConfiguration config = this.getConfig();
 
         // Get variables from config
-        final int cost = config.getInt("cost", 9);
+        final int xpPerBottle = config.getInt("cost", 9);
         final String permission = config.getString("permission", null);
         final Material blockType = Material.getMaterial(config.getString("block-type", Material.EMERALD_BLOCK.name()));
         final Sound sound = Sound.valueOf(config.getString("sound", Sound.ITEM_BOTTLE_FILL.name()));
@@ -73,42 +73,54 @@ public class XpBottlerPlugin extends JavaPlugin {
                     return;
                 }
 
+                // Assumes player always has at least one bottle because we already checked that they are holding one
+                int bottlesToFill = player.isSneaking() ?
+                    Math.min(
+                        XpBottlerPlugin.this.getPlayerExp(player) / xpPerBottle, 
+                        item.getAmount())
+                    : (XpBottlerPlugin.this.getPlayerExp(player) >= xpPerBottle) ? 1 : 0;
+
                 // Return if player does not have enough xp points
-                if (XpBottlerPlugin.this.getPlayerExp(player) < (player.isSneaking() ? cost * item.getAmount() : cost)) {
-                    player.sendMessage("§cYou need at least " + (player.isSneaking() ? cost * item.getAmount() : cost)
-                            + " experience points to do this!");
+                if (bottlesToFill == 0) {
+                    player.sendMessage("§cYou need at least " + xpPerBottle + " experience points to do this!");
                     return;
                 }
 
                 // Handle eco
                 if (economyHook != null && economyHook.ready()) {
-                    final double price = vaultPrice * (player.isSneaking() ? item.getAmount() : 1);
-                    if (!economyHook.has(player, price)) {
-                        player.sendMessage("§cYou need $" + price + " to do this.");
-                        return;
+                    double total = bottlesToFill * vaultPrice;
+                    double bal = economyHook.getBalance(player);
+
+                    if (total > bal) {
+                        //rounds down to what you can fully afford
+                        bottlesToFill = Double.valueOf(bal / vaultPrice).intValue();
+                        if (bottlesToFill == 0){
+                            player.sendMessage("§cYou need " + economyHook.toCurrency(vaultPrice) + " to fill a bottle.");
+                            return;
+                        } else {
+                            total = bottlesToFill * vaultPrice;
+                            player.sendMessage("§cYou only have enough money to fill " + 
+                                bottlesToFill + ((bottlesToFill == 1)? " bottle.":" bottles."));
+                        }
                     }
 
-                    economyHook.withdraw(player, price);
+                    economyHook.withdraw(player, total);
                 }
 
                 final ItemStack bottle = new ItemStack(Material.EXPERIENCE_BOTTLE);
-                bottle.setAmount(player.isSneaking() ? item.getAmount() : 1);
+                bottle.setAmount(bottlesToFill);
                 player.getInventory().addItem(bottle).forEach((integer, itemStack) ->
                         player.getWorld().dropItem(player.getLocation(), itemStack));
 
                 // Update players xp
-                XpBottlerPlugin.this.changePlayerExp(player, -(player.isSneaking() ? cost * item.getAmount() : cost));
+                XpBottlerPlugin.this.changePlayerExp(player, -bottlesToFill*xpPerBottle);
 
                 // Decrement glass bottle item amount
-                if (player.isSneaking()) {
+                if (bottlesToFill == item.getAmount()) {
                     player.getInventory().clear(player.getInventory().getHeldItemSlot());
                 } else {
-                    if (item.getAmount() > 1) {
-                        item.setAmount(item.getAmount() - 1);
-                        player.getInventory().setItemInMainHand(item);
-                    } else {
-                        player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                    }
+                    item.setAmount(item.getAmount() - bottlesToFill);
+                    player.getInventory().setItemInMainHand(item);
                 }
 
                 player.playSound(player.getLocation(), sound, 1, 1);
