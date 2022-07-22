@@ -6,3 +6,4 @@ sound: "ITEM_BOTTLE_FILL"
 vault:
   enable: false
   cost-per-bottle: 10.0
+  show-receipt: false

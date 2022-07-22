@@ -27,6 +27,7 @@ public class XpBottlerPlugin extends JavaPlugin {
         final Sound sound = Sound.valueOf(config.getString("sound", Sound.ITEM_BOTTLE_FILL.name()));
         final boolean enableVault = config.getBoolean("vault.enable", false);
         final double vaultPrice = config.getDouble("vault.cost-per-bottle");
+        final boolean showVaultReceipt = config.getBoolean("vault.show-receipt", false);
 
         // Exit if block type is unknown / invalid
         if (blockType == null) {
@@ -104,6 +105,12 @@ public class XpBottlerPlugin extends JavaPlugin {
                         }
                     }
 
+                    if (showVaultReceipt) {
+                        player.sendMessage("§cFilling " + bottlesToFill + 
+                            ((bottlesToFill == 1)? " bottle":" bottles") + 
+                            " for " + economyHook.toCurrency(total) + ".");
+                    }
+                    
                     economyHook.withdraw(player, total);
                 }
 
