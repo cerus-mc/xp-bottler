@@ -23,12 +23,33 @@ public class EconomyHook {
         return true;
     }
 
-    public boolean has(final Player player, final double d) {
-        return this.economy.has(player, d);
+    public double getBalance(final Player player) {
+        return this.economy.getBalance(player);
     }
 
     public void withdraw(final Player player, final double d) {
         this.economy.withdrawPlayer(player, d);
+    }
+
+    public String toCurrency(double d) {
+        String currency = (d == 1 || d == -1) ? 
+            this.economy.currencyNameSingular() : 
+            this.economy.currencyNamePlural();
+
+        if (currency == "") {
+            currency = "$";
+        }
+
+        if (currency.length() == 1) {
+            //assume prefix, don't know why vault doesn't have better support for letting us know but this is what other plugins are doing(sky block)
+            return currency + d;
+        } else {
+            return new StringBuilder()
+                .append(d)
+                .append(" ")
+                .append(currency)
+                .toString();
+        }
     }
 
 }
